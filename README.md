@@ -86,7 +86,7 @@ python evaluate.py data/dev.jsonl data/dev.db ../results/dev_greedy.jsonl
 
 | | |
 |---|---|
-| Trainable parameters | |
+| Trainable parameters | 7,577,600 |
 | Epochs trained / best epoch | |
 | Best dev loss | |
 | Training time and GPU | |
