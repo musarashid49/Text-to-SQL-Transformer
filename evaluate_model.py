@@ -19,7 +19,8 @@ from decode import beam_decode, greedy_decode, parse_sql
 # Set True only after dev scores are in, and only for the decoding method you keep.
 RUN_TEST = False
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else
+                      "mps" if torch.backends.mps.is_available() else "cpu")
 sp = spm.SentencePieceProcessor(model_file=str(ROOT / "starter" / "sql_sp.model"))
 model = Transformer(sp.get_piece_size()).to(device)
 
@@ -78,6 +79,7 @@ def write_predictions(split, decode_fn, out_path):
     print("where %", 100 * where_ok / n)
 
 
+@torch.no_grad()
 def plot_attention(example_index=0):
     examples, tables = load_split("dev")
     header = tables[examples[example_index]["table_id"]]["header"]

@@ -9,7 +9,8 @@ from dataset import make_loader
 from tokenizer import PAD_ID
 from model.transformer import Transformer
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else
+                      "mps" if torch.backends.mps.is_available() else "cpu")
 print("device", device)
 
 sp = spm.SentencePieceProcessor(model_file=str(ROOT / "starter" / "sql_sp.model"))
@@ -18,7 +19,7 @@ dev_loader = make_loader(str(ROOT / "starter" / "dev_pairs.jsonl"), sp, train=Fa
 model = Transformer(sp.get_piece_size()).to(device)
 print("trainable parameters", sum(p.numel() for p in model.parameters() if p.requires_grad))
 
-loss = nn.CrossEntropyLoss(ignore_index=PAD_ID, label_smoothing= 0.1)
+loss_fn = nn.CrossEntropyLoss(ignore_index=PAD_ID, label_smoothing= 0.1)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0 , betas=(0.9, 0.98) , eps=1e-9)
 
 def learning_rate(step, d_model=256, warmup=4000):
