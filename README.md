@@ -61,7 +61,32 @@ encoder input (64, 123, 256) decoder input (64, 30, 256)
 
 ## Training
 
-_TODO_
+Run the required single 20-epoch training run on a Colab or Kaggle GPU:
+
+```bash
+python train.py
+```
+
+Epoch losses are weighted by non-padding target-token counts; the per-batch
+training objective is unchanged. The lowest dev loss selects `results/best.pt`.
+`results/last.pt` stores the latest completed epoch for recovery:
+
+```bash
+python train.py --resume results/last.pt
+```
+
+Resume continues through epoch 20, rather than starting another 20 epochs. Keep
+the run's `best.pt` alongside `last.pt`, so the previously selected checkpoint
+remains available. Checkpoints include optimizer and random-generator states,
+seed (42), configuration, tokenizer SHA-256, epoch history, device and PyTorch
+version. Use the same data, tokenizer, hardware and environment when resuming;
+identical results across devices or nondeterministic kernels are not guaranteed.
+Older checkpoints without this metadata remain usable for evaluation but cannot
+be resumed by this script.
+
+Each completed epoch writes `results/training_history.json` (losses, step, LR,
+and elapsed seconds), `results/figures/training_loss.png`, and
+`results/figures/learning_rate.png` (the prescribed first 20,000 steps).
 
 ## Evaluation
 

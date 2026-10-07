@@ -4,3 +4,4 @@ records
 babel
 tqdm
 tabulate
+matplotlib
