@@ -18,6 +18,8 @@ that turns an English question about a table into a WikiSQL query.
 | `evaluate_model.py` | prediction files, component accuracy, attention map |
 | `results/` | prediction files, tables, figures, `samples.md` |
 | `app/` | front end |
+| `paths.py` | shared paths; puts `starter/` on `sys.path` so the given files are imported, never edited |
+| `task1_stats.py` | Task 1.3 length statistics and Task 1.4 positional-encoding heat-map |
 
 ## Setup
 
@@ -46,6 +48,29 @@ dev_pairs.jsonl: kept 8421, skipped 0
 src (64, 123) tgt (64, 31)
 encoder input (64, 123, 256) decoder input (64, 30, 256)
 ```
+
+Then, from the repository root:
+
+```bash
+python task1_stats.py    # Table 1 numbers + results/figures/positional_encoding.png
+```
+
+Output:
+
+```
+train: pairs=56355  source mean=42.55 max=222  target mean=14.77 max=65  over_long=19
+dev: pairs=8421  source mean=42.49 max=167  target mean=14.79 max=44  over_long=1
+test: pairs=15878  source mean=42.67 max=260  target mean=14.93 max=46  over_long=4
+```
+
+Lengths include `</s>` on the source and `<s> ... </s>` on the target. Only train drops
+over-long pairs; dev and test keep every row so predictions line up with `dev.jsonl`.
+
+### Positional-encoding heat-map (Task 1.4)
+
+![Positional encoding, first 100 positions x 256 dimensions](results/figures/positional_encoding.png)
+
+<!-- TODO: two-sentence explanation of what the heat-map shows -->
 
 ## Model configuration
 
@@ -102,44 +127,57 @@ python evaluate.py data/dev.jsonl data/dev.db ../results/dev_greedy.jsonl
 
 | | Train | Dev | Test |
 |---|---|---|---|
-| Pairs | | | |
-| Mean / max source length (tokens) | | | |
-| Mean / max target length (tokens) | | | |
-| Pairs dropped as too long | | – | – |
+| Pairs | 56,355 | 8,421 | 15,878 |
+| Mean / max source length (tokens) | 42.55 / 222 | 42.49 / 167 | 42.67 / 260 |
+| Mean / max target length (tokens) | 14.77 / 65 | 14.79 / 44 | 14.93 / 46 |
+| Pairs dropped as too long | 19 | – | – |
 
 ### Table 2 – Model and training
 
 | | |
 |---|---|
 | Trainable parameters | 7,577,600 |
-| Epochs trained / best epoch | |
-| Best dev loss | |
-| Training time and GPU | |
+| Epochs trained / best epoch | 20 / 20 |
+| Best dev loss | 1.4829 |
+| Training time and GPU | 21.5 minutes / NVIDIA Tesla T4 |
 
 ### Table 3 – Official metrics
 
 | Split | Decoding | Logical form (%) | Execution (%) | Parse failures (%) |
 |---|---|---|---|---|
-| Dev | greedy | | | |
-| Dev | beam (4) | | | |
-| Test | | | | |
+| Dev | greedy | 57.00 | 64.79 | 0.49 |
+| Dev | beam (4) | 57.40 | 65.24 | 0.56 |
+| Test | beam (4) | 57.49 | 64.59 | 0.50 |
 
 ### Table 4 – Component accuracy (dev)
 
 | | |
 |---|---|
-| `sel` column correct (%) | |
-| `agg` correct (%) | |
-| `WHERE` clause correct (%) | |
+| `sel` column correct (%) | 86.00 |
+| `agg` correct (%) | 88.59 |
+| `WHERE` clause correct (%) | 69.54 |
 
 ## Correctness checks
 
-- [ ] Causal mask
-- [ ] Padding mask
-- [ ] Attention rows sum to 1
-- [ ] Weight sharing (`is` check)
-- [ ] Learning-rate schedule plot
-- [ ] Gold round-trip (execution accuracy > 99%)
+- [x] Causal mask
+- [x] Padding mask
+- [x] Attention rows sum to 1
+- [x] Weight sharing (`is` check)
+- [x] Learning-rate schedule plot (`results/figures/learning_rate.png`)
+- [x] Gold round-trip (dev official evaluator: 100% logical-form and execution accuracy)
+
+Model check output (`python checks.py`):
+
+```
+[PASS] attention rows sum to 1: max |row sum - 1| = 1.2e-07, max weight on masked keys = 0.0e+00
+[PASS] multi-head attention: out (2, 3, 256), weights (2, 4, 3, 8), params 263,168, uninitialised: none
+[PASS] encoder/decoder layers: params ffn/enc/dec = 525,568/789,760/1,053,440, decoder uses encoder output: True, no peeking at future: True
+[PASS] encoder/decoder stacks: params enc/dec = 2,369,280/3,160,320, layers that ran: enc1 enc2 enc3 dec1 dec2 dec3
+[PASS] causal mask: max change at earlier positions = 0.0e+00 (last position changed by 3.05)
+[PASS] padding mask: source length 12 -> 19 with 7 extra <pad>: max output change = 4.1e-06
+[PASS] weight sharing: output_projection.weight is embedding weight: True, encoder & decoder inputs use it too: True
+[PASS] trainable parameters: 7,577,600
+```
 
 ## Front end
 
