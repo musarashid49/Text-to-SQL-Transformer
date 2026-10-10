@@ -70,7 +70,9 @@ over-long pairs; dev and test keep every row so predictions line up with `dev.js
 
 ![Positional encoding, first 100 positions x 256 dimensions](results/figures/positional_encoding.png)
 
-<!-- TODO: two-sentence explanation of what the heat-map shows -->
+Each position receives a fixed sinusoidal vector added to its token embedding, giving the
+Transformer information about token order. The sine and cosine waves use different
+frequencies, so positions have distinct patterns across the 256 dimensions.
 
 ## Model configuration
 
@@ -194,8 +196,3 @@ the app returns SQL with the supplied column names. Choose greedy decoding or be
 search (width 4).
 
 ![Text-to-SQL app generating SQL from a natural-language question](results/figures/frontend.png)
-
-## Links
-
-- Medium blog: _TODO_
-- LinkedIn post: _TODO_
