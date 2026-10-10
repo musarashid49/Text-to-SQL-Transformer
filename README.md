@@ -155,9 +155,21 @@ python evaluate.py data/dev.jsonl data/dev.db ../results/dev_greedy.jsonl
 
 | | |
 |---|---|
-| `sel` column correct (%) | 86.00 |
-| `agg` correct (%) | 88.59 |
-| `WHERE` clause correct (%) | 69.54 |
+| Dev beam-4: `sel` column correct (%) | 86.00 |
+| Dev beam-4: `agg` correct (%) | 88.59 |
+| Dev beam-4: `WHERE` clause correct (%) | 69.54 |
+
+### Cross-attention map (dev)
+
+The map below shows last-layer decoder cross-attention averaged over heads for one dev
+example. In this example, the generated `<c3>` token places strong attention on the source
+word `position`, and `<c5>` attends around the `school` column text, matching the corresponding
+table columns. This is a qualitative observation from one example, not a general guarantee.
+
+![Last-layer decoder cross-attention for one dev example](results/figures/cross_attention.png)
+
+Example question: “What position does the player who played for butler cc (ks) play?”
+The generated query selects `<c3>` (Position) and filters on `<c5>` (School/Club Team).
 
 ## Correctness checks
 
