@@ -181,7 +181,19 @@ Model check output (`python checks.py`):
 
 ## Front end
 
-_TODO: screenshot_
+Install the requirements and launch the Streamlit app from the repository root:
+
+```bash
+pip install -r requirements.txt
+streamlit run app/streamlit_app.py
+```
+
+The app needs the inference weights in `results/inference.pt` and their matching
+`starter/sql_sp.model` tokenizer. Enter a question and comma-separated table columns;
+the app returns SQL with the supplied column names. Choose greedy decoding or beam
+search (width 4).
+
+![Text-to-SQL app generating SQL from a natural-language question](results/figures/frontend.png)
 
 ## Links
 

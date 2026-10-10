@@ -1,5 +1,15 @@
-# Front end (Task 6.1)
+# Text-to-SQL web app
 
-Web interface (Streamlit, Gradio, Flask, ...) where the user types a question and a
-comma-separated list of column names, and gets back the generated SQL with real column
-names. It must call the trained model. Add a screenshot to the main README.
+This Streamlit app loads the trained checkpoint and its matching SentencePiece model,
+accepts a question and comma-separated table columns, then displays generated SQL using
+the supplied column names. It supports greedy decoding and beam search with width 4.
+
+From the repository root, install requirements and start the app:
+
+```bash
+pip install -r requirements.txt
+streamlit run app/streamlit_app.py
+```
+
+The app expects `results/inference.pt` and `starter/sql_sp.model`, exported from the same
+training run. It uses CUDA when available, then Apple MPS, then CPU.
